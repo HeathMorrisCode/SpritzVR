@@ -1,7 +1,8 @@
 package com.chernowii.spritzvr;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,11 +18,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    String text;
+String text;
     public TextView left;
     public TextView right;
     public int SpritzSpeed;
@@ -31,34 +31,40 @@ public class MainActivity extends AppCompatActivity {
     String firstWord = arr[start];
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-//Intent text stuff
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        final EditText edittext = new EditText(this);
+        alert.setMessage("Words Per Minute");
+        alert.setTitle("Enter the SPEED");
 
-        Intent receivedIntent = getIntent();
-        String receivedAction = receivedIntent.getAction();
-        String receivedType = receivedIntent.getType();
-        //make sure it's an action and type we can handle
-        if(receivedAction.equals(Intent.ACTION_SEND)){
-            text = receivedIntent.getStringExtra(Intent.EXTRA_TEXT);
-            if (text != null) {
-                int speed = 450;
+        alert.setView(edittext);
+
+        alert.setPositiveButton("LAUNCH", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+
+                int speed = Integer.parseInt(edittext.getText().toString());
                 SpritzSpeed = speed / 60;
-
                 left = (TextView) findViewById(R.id.left);
                 left.setText(firstWord);
                 right = (TextView) findViewById(R.id.right);
                 right.setText(firstWord);
+                ClipboardManager clipboard;
+                clipboard = (ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+                ClipData abc = clipboard.getPrimaryClip();
+                ClipData.Item item = abc.getItemAt(0);
+                text = item.getText().toString();
                 handler.sendEmptyMessageDelayed(1, SpritzSpeed);
-            }
-        }
-        else if(receivedAction.equals(Intent.ACTION_MAIN)){
-        }
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
+            }
+        });
+
+
+
+        alert.show();
 
     }
-
 
     private Handler handler = new Handler() {
         @Override
