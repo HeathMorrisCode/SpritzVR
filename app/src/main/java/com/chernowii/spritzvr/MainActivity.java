@@ -31,57 +31,34 @@ public class MainActivity extends AppCompatActivity {
     String firstWord = arr[start];
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+//Intent text stuff
 
-        // Get intent, action and MIME type
-        Intent intent = getIntent();
-        String action = intent.getAction();
-        String type = intent.getType();
+        Intent receivedIntent = getIntent();
+        String receivedAction = receivedIntent.getAction();
+        String receivedType = receivedIntent.getType();
+        //make sure it's an action and type we can handle
+        if(receivedAction.equals(Intent.ACTION_SEND)){
+            text = receivedIntent.getStringExtra(Intent.EXTRA_TEXT);
+            if (text != null) {
+                int speed = 450;
+                SpritzSpeed = speed / 60;
 
-        if (Intent.ACTION_SEND.equals(action) && type != null) {
-            if ("text/plain".equals(type)) {
-                handleSendText(intent); // Handle text being sent
+                left = (TextView) findViewById(R.id.left);
+                left.setText(firstWord);
+                right = (TextView) findViewById(R.id.right);
+                right.setText(firstWord);
+                handler.sendEmptyMessageDelayed(1, SpritzSpeed);
             }
-
         }
-
-
+        else if(receivedAction.equals(Intent.ACTION_MAIN)){
+        }
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
 
     }
-    void handleSendText(Intent intent) {
-        text = intent.getStringExtra(Intent.EXTRA_TEXT);
-        if (text != null) {
-            AlertDialog.Builder alert = new AlertDialog.Builder(this);
-            final EditText edittext = new EditText(this);
-            alert.setMessage("Words Per Minute");
-            alert.setTitle("Enter the SPEED");
 
-            alert.setView(edittext);
-
-            alert.setPositiveButton("LAUNCH", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-
-                    int speed = Integer.parseInt(edittext.getText().toString());
-                    SpritzSpeed = speed / 60;
-                    Toast.makeText(getApplicationContext(),SpritzSpeed,Toast.LENGTH_SHORT).show();
-                    left = (TextView) findViewById(R.id.left);
-                    left.setText(firstWord);
-                    right = (TextView) findViewById(R.id.right);
-                    right.setText(firstWord);
-                    handler.sendEmptyMessageDelayed(1, SpritzSpeed);
-
-                }
-            });
-
-
-
-            alert.show();
-        }
-    }
 
     private Handler handler = new Handler() {
         @Override
