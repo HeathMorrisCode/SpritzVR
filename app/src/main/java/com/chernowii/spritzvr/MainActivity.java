@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -39,71 +41,90 @@ String text = "";
        // setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-startEngine();
-
-    }
-void startVR(){
-    AlertDialog.Builder alert = new AlertDialog.Builder(this);
-    final EditText edittext = new EditText(this);
-    alert.setMessage("Words Per Minute");
-    alert.setTitle("Enter the SPEED");
-
-    alert.setView(edittext);
-
-    alert.setPositiveButton("NEXT", new DialogInterface.OnClickListener() {
-        public void onClick(DialogInterface dialog, int whichButton) {
-
-            int speed = Integer.parseInt(edittext.getText().toString());
-            SpritzSpeed = speed / 60;
-            left = (TextView) findViewById(R.id.left);
-            left.setText(firstWord);
-            right = (TextView) findViewById(R.id.right);
-            right.setText(firstWord);
-
+        Intent receivedIntent = getIntent();
+        String receivedAction = receivedIntent.getAction();
+        //make sure it's an action and type we can handle
+        if(receivedAction.equals(Intent.ACTION_SEND)){
+            String receivedText = receivedIntent.getStringExtra(Intent.EXTRA_TEXT);
+            //check we have a string
+            if (receivedText != null) {
+                //set the text
+                startEngine(receivedText);
+            }
 
         }
-    });
+        else if(receivedAction.equals(Intent.ACTION_MAIN)){
+            startEngine("input");        }
+
+    }
 
 
-
-    alert.show();
-}
-
-void startEngine(){
-    String POPUP_LOGIN_TITLE="Enter details";
-    final String POPUP_LOGIN_TEXT="Fill in the reading details";
-    final String EMAIL_HINT="Words Per Minute";
-    final String PASSWORD_HINT="Text to read";
+void startEngine(final String vrtext){
+    String Details="Enter details";
+    final String Fill="Fill in the reading details";
+    final String WORDS_PER_MINUTE="Text speed";
+    final String TEXT_2_READ="Text to read";
 
     AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-    alert.setTitle(POPUP_LOGIN_TITLE);
-    alert.setMessage(POPUP_LOGIN_TEXT);
+    alert.setTitle(Details);
+    alert.setMessage(Fill);
 
     // Set an EditText view to get user input
-    final EditText email = new EditText(this);
-    email.setHint(EMAIL_HINT);
-    final EditText password = new EditText(this);
-    password.setHint(PASSWORD_HINT);
+    final CheckBox wpm_fast = new CheckBox(this);
+    wpm_fast.setHint("Fast");
+    final CheckBox wpm_medium = new CheckBox(this);
+    wpm_medium.setHint("Medium");
+    final CheckBox wpm_slow = new CheckBox(this);
+    wpm_slow.setHint("Slow");
+    final EditText textbox = new EditText(this);
+    if(vrtext.equals("input")){
+        textbox.setHint(TEXT_2_READ);
+    }
+    else{
+        textbox.setVisibility(View.INVISIBLE);
+    }
+
     LinearLayout layout = new LinearLayout(getApplicationContext());
     layout.setOrientation(LinearLayout.VERTICAL);
-    layout.addView(email);
-    layout.addView(password);
+    layout.addView(wpm_fast);
+    layout.addView(wpm_medium);
+    layout.addView(wpm_slow);
+    layout.addView(textbox);
     alert.setView(layout);
 
     alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
         public void onClick(DialogInterface dialog, int whichButton) {
 
-            int speed = Integer.parseInt(email.getText().toString());
-            SpritzSpeed = speed / 60;
+            boolean isSlowChecked = wpm_slow.isChecked();
+            boolean isMediumChecked = wpm_medium.isChecked();
+            boolean isFastChecked = wpm_fast.isChecked();
+            if (isSlowChecked){
+                SpritzSpeed = 9000 / 60;
+            }
+            if (isMediumChecked){
+                SpritzSpeed = 6000 / 60;
+            }
+            if (isFastChecked){
+                SpritzSpeed = 4000 / 60;
+            }
             left = (TextView) findViewById(R.id.left);
             left.setText(firstWord);
             right = (TextView) findViewById(R.id.right);
             right.setText(firstWord);
             handler.sendEmptyMessageDelayed(1, SpritzSpeed);
-            text = password.getText().toString();
-            String arr[] = text.split(" ", countofwords);
-            String firstWord = arr[start];
+            if(vrtext.equals("input")){
+                text = textbox.getText().toString();
+                String arr[] = text.split(" ", countofwords);
+                firstWord = arr[start];
+            }
+            else{
+                text = vrtext;
+                textbox.setVisibility(View.VISIBLE);
+                String arr[] = text.split(" ", countofwords);
+                firstWord = arr[start];
+            }
+
         }
     });
 
@@ -116,6 +137,9 @@ void startEngine(){
     alert.show();
 
 }
+
+
+
     public Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
