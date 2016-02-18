@@ -10,7 +10,7 @@ Supports text share
 
 ###Download
 
-Releases: http://github.com/KonradIT/SpritzVR
+Releases: http://github.com/KonradIT/SpritzVR/releases
 
 Google Play: Soon
 
