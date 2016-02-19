@@ -18,4 +18,6 @@ F-Droid: Soon
 
 ---
 
-Video demo coming soon!
+###Video
+
+https://youtu.be/CTBYEftb28A
